@@ -9,8 +9,15 @@ from config import Config
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# OpenAI Client
-client = OpenAI(api_key=Config.OPENAI_API_KEY)
+# OpenAI Client (lazy loaded to allow Streamlit secrets to be available)
+client = None
+
+def get_client():
+    global client
+    if client is None:
+        api_key = Config.get_openai_api_key()
+        client = OpenAI(api_key=api_key)
+    return client
 
 # System prompt for healthcare chatbot
 SYSTEM_PROMPT = """
@@ -50,7 +57,7 @@ class OpenAIHealthcareChatbot:
             messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.conversation_history
 
             # Request to OpenAI
-            response = client.chat.completions.create(
+            response = get_client().chat.completions.create(
                 model="gpt-4o-mini",        # Change model here if needed
                 messages=messages
             )
@@ -119,7 +126,8 @@ def main():
 if __name__ == "__main__":
     print("🚀 Starting MediMate Healthcare Chatbot (OpenAI Version)...")
     print("🤖 Using OpenAI GPT-4o-mini")
-    print(f"🔑 OPENAI KEY LOADED: {Config.OPENAI_API_KEY[:6]}********")
+    api_key = Config.get_openai_api_key()
+    print(f"🔑 OPENAI KEY LOADED: {api_key[:6]}********")
     print("🌍 https://medichatbot-hu35xsasjg4ejgw9bt2qpq.streamlit.app/")
     st.set_page_config(page_title="MediMate Healthcare Chatbot", layout="wide")
     main()
