@@ -2,21 +2,21 @@ import streamlit as st
 from datetime import datetime
 import logging
 
-from openai import OpenAI
+from groq import Groq
 from config import Config
 
 # Logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# OpenAI Client (lazy loaded to allow Streamlit secrets to be available)
+# Groq Client (lazy loaded to allow Streamlit secrets to be available)
 client = None
 
 def get_client():
     global client
     if client is None:
-        api_key = Config.get_openai_api_key()
-        client = OpenAI(api_key=api_key)
+        api_key = Config.get_groq_api_key()
+        client = Groq(api_key=api_key)
     return client
 
 # System prompt for healthcare chatbot
@@ -56,9 +56,9 @@ class OpenAIHealthcareChatbot:
             # Build OpenAI messages
             messages = [{"role": "system", "content": SYSTEM_PROMPT}] + self.conversation_history
 
-            # Request to OpenAI
+            # Request to Groq
             response = get_client().chat.completions.create(
-                model="gpt-4o-mini",        # Change model here if needed
+                model="mixtral-8x7b-32768",        # Groq's Mixtral model
                 messages=messages
             )
 
@@ -103,11 +103,11 @@ def chat_interface():
     
     # Debug info in expander
     with st.expander("🔧 Debug Info"):
-        api_key = Config.get_openai_api_key()
+        api_key = Config.get_groq_api_key()
         if api_key:
-            st.success(f"✅ API Key loaded: {api_key[:10]}...")
+            st.success(f"✅ Groq API Key loaded: {api_key[:10]}...")
         else:
-            st.error("❌ API Key not found. Please add OPENAI_API_KEY to Streamlit secrets.")
+            st.error("❌ Groq API Key not found. Please add GROQ_API_KEY to Streamlit secrets.")
 
     # Display the conversation history
     for message in chatbot.conversation_history:
@@ -141,10 +141,10 @@ def main():
         new_chat()
 
 if __name__ == "__main__":
-    print("🚀 Starting MediMate Healthcare Chatbot (OpenAI Version)...")
-    print("🤖 Using OpenAI GPT-4o-mini")
-    api_key = Config.get_openai_api_key()
-    print(f"🔑 OPENAI KEY LOADED: {api_key[:6]}********")
+    print("🚀 Starting MediMate Healthcare Chatbot (Groq Version)...")
+    print("🤖 Using Groq Mixtral-8x7b")
+    api_key = Config.get_groq_api_key()
+    print(f"🔑 GROQ KEY LOADED: {api_key[:6]}********")
     print("🌍 https://medichatbot-hu35xsasjg4ejgw9bt2qpq.streamlit.app/")
     st.set_page_config(page_title="MediMate Healthcare Chatbot", layout="wide")
     main()
