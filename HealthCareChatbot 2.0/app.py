@@ -58,7 +58,7 @@ class OpenAIHealthcareChatbot:
 
             # Request to Groq
             response = get_client().chat.completions.create(
-                model="llama-3.1-70b-versatile",        # Groq's Llama model (stable)
+                model="llama-3.3-70b-versatile",        # Groq's latest Llama model
                 messages=messages
             )
 
@@ -142,7 +142,7 @@ def main():
 
 if __name__ == "__main__":
     print("🚀 Starting MediMate Healthcare Chatbot (Groq Version)...")
-    print("🤖 Using Groq Llama-3.1-70b")
+    print("🤖 Using Groq Llama-3.3-70b")
     api_key = Config.get_groq_api_key()
     print(f"🔑 GROQ KEY LOADED: {api_key[:6]}********")
     print("🌍 https://medichatbot-hu35xsasjg4ejgw9bt2qpq.streamlit.app/")
