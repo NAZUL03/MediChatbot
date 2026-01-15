@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, session
+import streamlit as st
 from datetime import datetime
 import logging
 from config import Config
@@ -8,11 +8,7 @@ from openai import OpenAI
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-app.secret_key = Config.SECRET_KEY
-# ================================
-# OPENAI CLIENT
-# ================================
+# OpenAI Client
 client = OpenAI(api_key=Config.OPENAI_API_KEY)
 
 # System prompt for healthcare chatbot
@@ -29,9 +25,7 @@ Rules:
 Keep responses short, helpful, and easy to read.
 """
 
-# ================================
-# HEALTHCARE CHATBOT (OPENAI)
-# ================================
+# Healthcare Chatbot Class
 class OpenAIHealthcareChatbot:
     def __init__(self):
         self.conversation_history = []
@@ -80,75 +74,65 @@ class OpenAIHealthcareChatbot:
 # Create chatbot instance
 chatbot = OpenAIHealthcareChatbot()
 
-# ================================
-# ROUTES
-# ================================
-@app.route('/')
-def home():
-    if "chat_initialized" not in session:
+# Streamlit Interface
+def chat_interface():
+    # Session state to remember conversation history
+    if 'chat_initialized' not in st.session_state:
         chatbot.initialize_conversation()
-        session["chat_initialized"] = True
-        session["conversation_start"] = datetime.now().isoformat()
+        st.session_state.chat_initialized = True
+        st.session_state.conversation_start = datetime.now().isoformat()
 
-    return render_template("index.html")
+    st.title("MediMate Healthcare Chatbot 🩺🤖")
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    try:
-        data = request.get_json()
-        user_message = data.get("message", "").strip()
+    # Display the conversation history
+    for message in chatbot.conversation_history:
+        if message["role"] == "assistant":
+            st.markdown(f"**Assistant:** {message['content']}")
+        else:
+            st.markdown(f"**You:** {message['content']}")
 
-        if not user_message:
-            return jsonify({"error": "Empty message"}), 400
+    # Input text box for user message
+    user_message = st.text_input("Your message:", "")
 
+    if user_message:
+        # Get chatbot's reply
         bot_reply = chatbot.get_chat_response(user_message)
+        st.markdown(f"**Assistant:** {bot_reply}")
 
-        return jsonify({
-            "reply": bot_reply,
-            "timestamp": datetime.now().isoformat()
-        })
-
-    except Exception as e:
-        logger.error(f"Chat error: {e}")
-        return jsonify({"error": "Internal server error"}), 500
-
-@app.route('/new_chat', methods=['POST'])
+# Start new chat
 def new_chat():
     chatbot.initialize_conversation()
-    session["conversation_start"] = datetime.now().isoformat()
+    st.session_state.conversation_start = datetime.now().isoformat()
+    st.success("New conversation started! 👋")
 
-    return jsonify({
-        "status": "success",
-        "message": "New conversation started",
-        "welcome_message": chatbot.conversation_history[0]["content"]
-    })
-
-@app.route('/test')
+# OpenAI Test Function
 def test_api():
-    """Test OpenAI connection"""
     try:
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=[{"role": "user", "content": "Say only: 'OpenAI API is working!'"}]
         )
-
         reply = response.choices[0].message["content"]
-
-        return jsonify({
-            "status": "success",
-            "message": "OpenAI API is working 🎉",
-            "response": reply
-        })
-
+        st.success(f"OpenAI API is working 🎉\nResponse: {reply}")
     except Exception as e:
-        return jsonify({
-            "status": "error",
-            "message": f"OpenAI Test Failed: {e}"
-        })
+        st.error(f"OpenAI Test Failed: {e}")
+
+# Streamlit App main
+def main():
+    st.sidebar.title("Options")
+    option = st.sidebar.radio("Select an action", ("Chat", "New Chat", "Test API"))
+
+    if option == "Chat":
+        chat_interface()
+    elif option == "New Chat":
+        new_chat()
+    elif option == "Test API":
+        test_api()
 
 if __name__ == "__main__":
     print("🚀 Starting MediMate Healthcare Chatbot (OpenAI Version)...")
     print("🤖 Using OpenAI GPT-4o-mini")
     print(f"🔑 OPENAI KEY LOADED: {Config.OPENAI_API_KEY[:6]}********")
-    print("🌍 http://localhost:5000")
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    print("🌍 http://localhost:8501")
+    st.set_page_config(page_title="MediMate Healthcare Chatbot", layout="wide")
+    main()
