@@ -109,30 +109,108 @@ def chat_interface():
         st.session_state.chat_initialized = True
         st.session_state.conversation_start = datetime.now().isoformat()
 
-    st.title("MediMate Healthcare Chatbot 🩺🤖")
+    # Page config
+    st.set_page_config(page_title="MediMate", layout="centered", initial_sidebar_state="collapsed")
     
-    # Debug info in expander
-    with st.expander("🔧 Debug Info"):
-        api_key = Config.get_groq_api_key()
-        if api_key:
-            st.success(f"✅ Groq API Key loaded: {api_key[:10]}...")
-        else:
-            st.error("❌ Groq API Key not found. Please add GROQ_API_KEY to Streamlit secrets.")
-
-    # Display the conversation history
+    # Custom CSS for chatbot styling
+    st.markdown("""
+    <style>
+        .chat-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .message-box {
+            padding: 12px 16px;
+            border-radius: 12px;
+            margin: 8px 0;
+            word-wrap: break-word;
+        }
+        .user-message {
+            background-color: #007AFF;
+            color: white;
+            margin-left: auto;
+            margin-right: 0;
+            width: fit-content;
+            max-width: 70%;
+            border-radius: 18px 4px 18px 18px;
+        }
+        .assistant-message {
+            background-color: #E8E8EA;
+            color: #000;
+            margin-right: auto;
+            margin-left: 0;
+            width: fit-content;
+            max-width: 70%;
+            border-radius: 4px 18px 18px 18px;
+        }
+        .chat-header {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 2px solid #E8E8EA;
+            margin-bottom: 20px;
+        }
+        .input-container {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            border-top: 2px solid #E8E8EA;
+            padding-top: 15px;
+        }
+    </style>
+    """, unsafe_allow_html=True)
+    
+    # Header
+    st.markdown("""
+    <div class="chat-header">
+        <h1>🩺 MediMate Healthcare Chatbot</h1>
+        <p style="color: #888; margin-top: -15px;">Your AI Healthcare Assistant</p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Display the conversation history with better formatting
+    st.markdown('<div class="chat-container">', unsafe_allow_html=True)
+    
     for message in chatbot.conversation_history:
         if message["role"] == "assistant":
-            st.markdown(f"**Assistant:** {message['content']}")
+            st.markdown(f'<div class="message-box assistant-message">🤖 {message["content"]}</div>', 
+                       unsafe_allow_html=True)
         else:
-            st.markdown(f"**You:** {message['content']}")
-
-    # Input text box for user message
-    user_message = st.text_input("Your message:", "")
-
-    if user_message:
+            st.markdown(f'<div class="message-box user-message">👤 {message["content"]}</div>', 
+                       unsafe_allow_html=True)
+    
+    st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Input area with better styling
+    st.markdown('<hr style="margin: 20px 0">', unsafe_allow_html=True)
+    
+    col1, col2 = st.columns([5, 1])
+    
+    with col1:
+        user_message = st.text_input(
+            "Type your message...",
+            placeholder="Ask me about health, wellness, or medical topics...",
+            label_visibility="collapsed",
+            key="user_input"
+        )
+    
+    with col2:
+        send_button = st.button("Send ➤", use_container_width=True)
+    
+    if send_button and user_message:
         # Get chatbot's reply
-        bot_reply = chatbot.get_chat_response(user_message)
-        st.markdown(f"**Assistant:** {bot_reply}")
+        with st.spinner("🤖 Thinking..."):
+            bot_reply = chatbot.get_chat_response(user_message)
+        st.rerun()
+    
+    # Debug info in sidebar
+    with st.sidebar:
+        st.markdown("### ⚙️ Settings")
+        with st.expander("🔧 Debug Info"):
+            api_key = Config.get_groq_api_key()
+            if api_key:
+                st.success(f"✅ Groq API Key loaded")
+            else:
+                st.error("❌ Groq API Key not found")
 
 # Start new chat
 def new_chat():
@@ -142,19 +220,31 @@ def new_chat():
 
 # Streamlit App main
 def main():
-    st.sidebar.title("Options")
-    option = st.sidebar.radio("Select an action", ("Chat", "New Chat"))
-
-    if option == "Chat":
-        chat_interface()
-    elif option == "New Chat":
-        new_chat()
+    if 'current_page' not in st.session_state:
+        st.session_state.current_page = "chat"
+    
+    # Sidebar menu
+    with st.sidebar:
+        st.markdown("### 🏠 Menu")
+        if st.button("💬 New Chat", use_container_width=True):
+            chatbot.initialize_conversation()
+            st.session_state.current_page = "chat"
+            st.rerun()
+    
+    chat_interface()
 
 if __name__ == "__main__":
+    # Set page config first
+    st.set_page_config(
+        page_title="MediMate Healthcare Chatbot",
+        page_icon="🩺",
+        layout="centered",
+        initial_sidebar_state="collapsed"
+    )
+    
     print("🚀 Starting MediMate Healthcare Chatbot (Groq Version)...")
     print("🤖 Using Groq Llama-3.3-70b")
     api_key = Config.get_groq_api_key()
-    print(f"🔑 GROQ KEY LOADED: {api_key[:6]}********")
+    print(f"🔑 GROQ KEY LOADED: {api_key[:6] if api_key else 'NOT FOUND'}...")
     print("🌍 https://medichatbot-hu35xsasjg4ejgw9bt2qpq.streamlit.app/")
-    st.set_page_config(page_title="MediMate Healthcare Chatbot", layout="wide")
     main()
