@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MediMate - AI Healthcare Assistant</title>
+
+    <!-- Google Font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <!-- CSS -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+    <div class="container">
+
+        <!-- HEADER -->
+        <header class="chat-header">
+            <h1>MediMate 🩺</h1>
+            <p class="subtitle">Your AI Healthcare Assistant</p>
+            <button id="newChatBtn" class="new-chat-btn" aria-label="Start a new chat">New Chat</button>
+        </header>
+
+        <!-- MAIN CHAT AREA -->
+        <main class="chat-area">
+
+            <!-- CHAT MESSAGES -->
+            <div id="chatMessages" class="chat-messages"></div>
+
+            <!-- TYPING INDICATOR -->
+            <div id="typingIndicator" class="typing-indicator">
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+                <div class="typing-dot"></div>
+            </div>
+
+        </main>
+
+        <!-- INPUT AREA -->
+        <footer class="input-area">
+            <input 
+                id="messageInput" 
+                type="text" 
+                placeholder="Ask a health question..." 
+                maxlength="300"
+                aria-label="Your message"
+                autocomplete="off"
+            />
+
+            <button id="sendButton" class="send-btn" aria-label="Send message">
+                Send
+            </button>
+        </footer>
+
+    </div>
+
+    <!-- JAVASCRIPT -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
