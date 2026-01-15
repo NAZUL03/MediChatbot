@@ -58,7 +58,7 @@ class OpenAIHealthcareChatbot:
 
             # Request to Groq
             response = get_client().chat.completions.create(
-                model="mixtral-8x7b-32768",        # Groq's Mixtral model
+                model="llama-3.1-70b-versatile",        # Groq's Llama model (stable)
                 messages=messages
             )
 
@@ -77,12 +77,12 @@ class OpenAIHealthcareChatbot:
 
         except Exception as e:
             error_msg = str(e)
-            print(f"❌ OpenAI Error: {error_msg}")
-            logger.error(f"OpenAI API Error: {error_msg}")
+            print(f"❌ Groq Error: {error_msg}")
+            logger.error(f"Groq API Error: {error_msg}")
             
             # Provide better error messages
             if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
-                return "API key error. Please ensure the OpenAI API key is properly configured."
+                return "API key error. Please ensure the Groq API key is properly configured in Streamlit secrets."
             elif "rate" in error_msg.lower():
                 return "Rate limit exceeded. Please wait a moment and try again."
             else:
@@ -142,7 +142,7 @@ def main():
 
 if __name__ == "__main__":
     print("🚀 Starting MediMate Healthcare Chatbot (Groq Version)...")
-    print("🤖 Using Groq Mixtral-8x7b")
+    print("🤖 Using Groq Llama-3.1-70b")
     api_key = Config.get_groq_api_key()
     print(f"🔑 GROQ KEY LOADED: {api_key[:6]}********")
     print("🌍 https://medichatbot-hu35xsasjg4ejgw9bt2qpq.streamlit.app/")
