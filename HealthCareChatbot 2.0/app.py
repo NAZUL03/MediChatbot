@@ -76,8 +76,17 @@ class OpenAIHealthcareChatbot:
             return bot_reply
 
         except Exception as e:
-            print(f"❌ OpenAI Error: {e}")
-            return "I'm having trouble connecting to OpenAI. Please try again."
+            error_msg = str(e)
+            print(f"❌ OpenAI Error: {error_msg}")
+            logger.error(f"OpenAI API Error: {error_msg}")
+            
+            # Provide better error messages
+            if "api_key" in error_msg.lower() or "authentication" in error_msg.lower():
+                return "API key error. Please ensure the OpenAI API key is properly configured."
+            elif "rate" in error_msg.lower():
+                return "Rate limit exceeded. Please wait a moment and try again."
+            else:
+                return f"Error: {error_msg[:100] if len(error_msg) > 100 else error_msg}"
 
 # Create chatbot instance
 chatbot = OpenAIHealthcareChatbot()
@@ -91,6 +100,14 @@ def chat_interface():
         st.session_state.conversation_start = datetime.now().isoformat()
 
     st.title("MediMate Healthcare Chatbot 🩺🤖")
+    
+    # Debug info in expander
+    with st.expander("🔧 Debug Info"):
+        api_key = Config.get_openai_api_key()
+        if api_key:
+            st.success(f"✅ API Key loaded: {api_key[:10]}...")
+        else:
+            st.error("❌ API Key not found. Please add OPENAI_API_KEY to Streamlit secrets.")
 
     # Display the conversation history
     for message in chatbot.conversation_history:
