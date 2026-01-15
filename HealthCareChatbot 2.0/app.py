@@ -1,8 +1,9 @@
 import streamlit as st
 from datetime import datetime
 import logging
-from config import Config
+
 from openai import OpenAI
+from config import Config
 
 # Logging
 logging.basicConfig(level=logging.INFO)
@@ -119,6 +120,6 @@ if __name__ == "__main__":
     print("🚀 Starting MediMate Healthcare Chatbot (OpenAI Version)...")
     print("🤖 Using OpenAI GPT-4o-mini")
     print(f"🔑 OPENAI KEY LOADED: {Config.OPENAI_API_KEY[:6]}********")
-    print("🌍 http://localhost:8501")
+    print("🌍 https://medichatbot-hu35xsasjg4ejgw9bt2qpq.streamlit.app/")
     st.set_page_config(page_title="MediMate Healthcare Chatbot", layout="wide")
     main()
