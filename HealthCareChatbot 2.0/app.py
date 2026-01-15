@@ -105,29 +105,15 @@ def new_chat():
     st.session_state.conversation_start = datetime.now().isoformat()
     st.success("New conversation started! 👋")
 
-# OpenAI Test Function
-def test_api():
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            messages=[{"role": "user", "content": "Say only: 'OpenAI API is working!'"}]
-        )
-        reply = response.choices[0].message["content"]
-        st.success(f"OpenAI API is working 🎉\nResponse: {reply}")
-    except Exception as e:
-        st.error(f"OpenAI Test Failed: {e}")
-
 # Streamlit App main
 def main():
     st.sidebar.title("Options")
-    option = st.sidebar.radio("Select an action", ("Chat", "New Chat", "Test API"))
+    option = st.sidebar.radio("Select an action", ("Chat", "New Chat"))
 
     if option == "Chat":
         chat_interface()
     elif option == "New Chat":
         new_chat()
-    elif option == "Test API":
-        test_api()
 
 if __name__ == "__main__":
     print("🚀 Starting MediMate Healthcare Chatbot (OpenAI Version)...")
