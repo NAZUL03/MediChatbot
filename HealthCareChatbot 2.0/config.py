@@ -15,11 +15,16 @@ class Config:
         # First try Streamlit secrets (for cloud deployment)
         if STREAMLIT_AVAILABLE:
             try:
-                return st.secrets["GROQ_API_KEY"]
-            except (KeyError, AttributeError):
+                key = st.secrets.get("GROQ_API_KEY")
+                if key:
+                    return key
+            except (KeyError, AttributeError, FileNotFoundError):
                 pass
         # Fall back to environment variable (for local development)
-        return os.getenv("GROQ_API_KEY")
+        key = os.getenv("GROQ_API_KEY")
+        if key:
+            return key
+        return None
     
     SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key")
 

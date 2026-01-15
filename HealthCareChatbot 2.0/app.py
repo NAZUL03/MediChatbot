@@ -16,6 +16,16 @@ def get_client():
     global client
     if client is None:
         api_key = Config.get_groq_api_key()
+        if not api_key:
+            raise ValueError(
+                "❌ GROQ_API_KEY is missing!\n\n"
+                "On Streamlit Cloud:\n"
+                "1. Click ☰ menu → Settings\n"
+                "2. Add to Secrets:\n"
+                '   GROQ_API_KEY = "gsk_..."\n'
+                "3. Click Reboot app\n\n"
+                "Locally: Add GROQ_API_KEY to .env file"
+            )
         client = Groq(api_key=api_key)
     return client
 
