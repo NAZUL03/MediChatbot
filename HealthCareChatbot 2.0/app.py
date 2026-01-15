@@ -72,7 +72,7 @@ class OpenAIHealthcareChatbot:
                 messages=messages
             )
 
-            bot_reply = response.choices[0].message["content"]
+            bot_reply = response.choices[0].message.content
 
             self.add_message("assistant", bot_reply)
 
